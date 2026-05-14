@@ -18,6 +18,7 @@ class PedidoItem(BaseModel):
 class PedidoCreate(BaseModel):
     cliente_nombre: str
     cliente_email: str
+    cliente_sns_arn: Optional[str] = None
 
 
 class AddItemRequest(BaseModel):
@@ -28,6 +29,7 @@ class Pedido(BaseModel):
     id: str
     cliente_nombre: str
     cliente_email: str
+    cliente_sns_arn: Optional[str] = None
     estado: EstadoPedido
     items: List[PedidoItem] = []
     total: float = 0.0
@@ -39,6 +41,7 @@ class Pedido(BaseModel):
             id=str(uuid4()),
             cliente_nombre=data.cliente_nombre,
             cliente_email=data.cliente_email,
+            cliente_sns_arn=data.cliente_sns_arn,
             estado="Abierto",
             items=[],
             total=0.0,

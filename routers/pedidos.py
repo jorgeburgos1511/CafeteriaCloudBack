@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from botocore.exceptions import ClientError
 from decimal import Decimal
 from schemas.pedido import Pedido, PedidoCreate, AddItemRequest
-from aws.dynamodb import pedidos_table, products_table
+from aws.dynamodb import pedidos_table, products_table, customers_table
 from aws.sns import publish_ticket
 from aws.s3 import upload_ticket_pdf
 from aws.pdf import generate_ticket_pdf
@@ -30,6 +30,14 @@ def _deserialize(item: dict) -> dict:
 @router.post("/", response_model=Pedido)
 def create_pedido(data: PedidoCreate):
     try:
+        if not data.cliente_sns_arn:
+            scan = customers_table.scan(
+                FilterExpression="cliente_email = :e",
+                ExpressionAttributeValues={":e": data.cliente_email},
+            )
+            items = scan.get("Items", [])
+            if items:
+                data.cliente_sns_arn = items[0].get("sns_topic_arn")
         pedido = Pedido.create(data)
         pedidos_table.put_item(Item=_serialize(pedido))
         return pedido

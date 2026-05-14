@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Query
 from botocore.exceptions import ClientError
 from schemas.customer import CustomerCreate, CustomerUpdate, Customer
 from aws.dynamodb import customers_table
-from aws.sns import subscribe_email
+from aws.sns import create_client_topic
 
 router = APIRouter(prefix="/customers", tags=["customers"])
 
@@ -25,7 +25,13 @@ def create_customer(customer: CustomerCreate):
     try:
         customers_table.put_item(Item=new_customer.model_dump())
         try:
-            subscribe_email(new_customer.email)
+            topic_arn = create_client_topic(new_customer.id, new_customer.email)
+            new_customer.sns_topic_arn = topic_arn
+            customers_table.update_item(
+                Key={"id": new_customer.id},
+                UpdateExpression="SET sns_topic_arn = :a",
+                ExpressionAttributeValues={":a": topic_arn},
+            )
         except Exception:
             pass
         return new_customer
