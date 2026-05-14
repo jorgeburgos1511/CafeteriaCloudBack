@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Query
 from botocore.exceptions import ClientError
 from schemas.customer import CustomerCreate, CustomerUpdate, Customer
 from aws.dynamodb import customers_table
+from aws.sns import subscribe_email
 
 router = APIRouter(prefix="/customers", tags=["customers"])
 
@@ -23,6 +24,10 @@ def create_customer(customer: CustomerCreate):
 
     try:
         customers_table.put_item(Item=new_customer.model_dump())
+        try:
+            subscribe_email(new_customer.email)
+        except Exception:
+            pass
         return new_customer
     except ClientError as e:
         raise HTTPException(

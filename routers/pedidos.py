@@ -3,7 +3,9 @@ from botocore.exceptions import ClientError
 from decimal import Decimal
 from schemas.pedido import Pedido, PedidoCreate, AddItemRequest
 from aws.dynamodb import pedidos_table, products_table
-from aws.sns import subscribe_email, publish_ticket
+from aws.sns import publish_ticket
+from aws.s3 import upload_ticket_pdf
+from aws.pdf import generate_ticket_pdf
 
 router = APIRouter(prefix="/pedidos", tags=["pedidos"])
 
@@ -30,10 +32,6 @@ def create_pedido(data: PedidoCreate):
     try:
         pedido = Pedido.create(data)
         pedidos_table.put_item(Item=_serialize(pedido))
-        try:
-            subscribe_email(data.cliente_email)
-        except Exception:
-            pass
         return pedido
     except ClientError as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -189,7 +187,9 @@ def finalizar_pedido(pedido_id: str):
         pedidos_table.put_item(Item=_serialize(updated))
 
         try:
-            publish_ticket(pedido)
+            pdf_bytes = generate_ticket_pdf(pedido)
+            pdf_url = upload_ticket_pdf(pedido["id"], pdf_bytes)
+            publish_ticket(pedido, pdf_url)
         except Exception:
             pass
 
