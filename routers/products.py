@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, UploadFile, File
 from botocore.exceptions import ClientError
 from decimal import Decimal
 from schemas.product import ProductCreate, ProductUpdate, Product
 from aws.dynamodb import products_table
+from aws.s3 import upload_product_image
 from typing import Literal
 
 router = APIRouter(prefix="/products", tags=["products"])
@@ -164,6 +165,29 @@ def update_product(product_id: str, product_data: ProductUpdate):
             status_code=500,
             detail=f"Error al actualizar producto: {str(e)}"
         )
+
+
+@router.post("/{product_id}/image", response_model=Product)
+def upload_image(product_id: str, file: UploadFile = File(...)):
+    try:
+        existing = products_table.get_item(Key={"id": product_id})
+        if "Item" not in existing:
+            raise HTTPException(status_code=404, detail="Producto no encontrado")
+
+        content = file.file.read()
+        image_url = upload_product_image(content, file.content_type)
+
+        products_table.update_item(
+            Key={"id": product_id},
+            UpdateExpression="SET image_url = :u",
+            ExpressionAttributeValues={":u": image_url},
+        )
+
+        product = deserialize_product_from_dynamodb(existing["Item"])
+        product["image_url"] = image_url
+        return product
+    except ClientError as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/{product_id}")

@@ -1,32 +1,46 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from uuid import uuid4
-from typing import Literal, Optional
+from typing import Literal, List
 from datetime import datetime, timezone
 
-EstadoPedido = Literal["Recibido", "En preparación", "Listo", "Entregado", "Cancelado"]
+EstadoItem = Literal["Recibido", "En preparación", "Listo", "Entregado"]
+EstadoPedido = Literal["Abierto", "Confirmado", "Finalizado", "Cancelado"]
+
+
+class PedidoItem(BaseModel):
+    item_id: str = Field(default_factory=lambda: str(uuid4()))
+    producto_id: str
+    producto_nombre: str
+    precio: float
+    estado: EstadoItem = "Recibido"
 
 
 class PedidoCreate(BaseModel):
-    cliente: str
-    producto: str
-    nota: Optional[str] = None
+    cliente_nombre: str
+    cliente_email: str
+
+
+class AddItemRequest(BaseModel):
+    producto_id: str
 
 
 class Pedido(BaseModel):
     id: str
-    cliente: str
-    producto: str
+    cliente_nombre: str
+    cliente_email: str
     estado: EstadoPedido
-    nota: Optional[str] = None
+    items: List[PedidoItem] = []
+    total: float = 0.0
     created_at: str
 
     @staticmethod
     def create(data: PedidoCreate) -> "Pedido":
         return Pedido(
             id=str(uuid4()),
-            cliente=data.cliente,
-            producto=data.producto,
-            estado="Recibido",
-            nota=data.nota,
+            cliente_nombre=data.cliente_nombre,
+            cliente_email=data.cliente_email,
+            estado="Abierto",
+            items=[],
+            total=0.0,
             created_at=datetime.now(timezone.utc).isoformat(),
         )

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from uuid import uuid4
-from typing import Literal
+from typing import Literal, Optional
 
 class ProductCreate(BaseModel):
     name: str
@@ -16,6 +16,7 @@ class ProductUpdate(BaseModel):
 
 class Product(ProductCreate):
     id: str
+    image_url: Optional[str] = None
 
     @staticmethod
     def create(data: ProductCreate):
@@ -24,5 +25,6 @@ class Product(ProductCreate):
             name=data.name,
             price=data.price,
             category=data.category,
-            available=data.available
+            available=data.available,
+            image_url=None,
         )

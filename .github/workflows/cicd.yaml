@@ -62,6 +62,17 @@ jobs:
             docker stop cafeteriacloud-api || true
             docker rm cafeteriacloud-api || true
 
+            echo "Writing env file..."
+            mkdir -p ~/CafeteriaCloud
+            printf '%s\n' \
+              "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" \
+              "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+              "AWS_SESSION_TOKEN=${{ secrets.AWS_SESSION_TOKEN }}" \
+              "AWS_DEFAULT_REGION=${{ secrets.AWS_REGION }}" \
+              "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" \
+              "SNS_TOPIC_ARN=${{ secrets.SNS_TOPIC_ARN }}" \
+              > ~/CafeteriaCloud/.env.prod
+
             echo "Starting new container..."
             docker run -d \
               --name cafeteriacloud-api \
