@@ -18,13 +18,23 @@ def get_dashboard():
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
         pedidos_hoy = sum(1 for p in pedidos if p.get("created_at", "").startswith(today))
-        en_preparacion = sum(1 for p in pedidos if p.get("estado") == "En preparación")
-        listos = sum(1 for p in pedidos if p.get("estado") == "Listo")
-        ordenes_completadas = sum(1 for p in pedidos if p.get("estado") == "Entregado")
+        ordenes_completadas = sum(1 for p in pedidos if p.get("estado") == "Finalizado")
+
+        en_preparacion = sum(
+            1 for p in pedidos
+            for item in p.get("items", [])
+            if item.get("estado") == "En preparación"
+        )
+        listos = sum(
+            1 for p in pedidos
+            for item in p.get("items", [])
+            if item.get("estado") == "Listo"
+        )
 
         actividad = sorted(pedidos, key=lambda p: p.get("created_at", ""), reverse=True)[:5]
         actividad_reciente = [
-            f"Pedido de {p['cliente']} — {p['estado']}" for p in actividad
+            f"Pedido de {p.get('cliente_nombre', p.get('cliente', 'Desconocido'))} — {p.get('estado', '')}"
+            for p in actividad
         ]
 
         return {
