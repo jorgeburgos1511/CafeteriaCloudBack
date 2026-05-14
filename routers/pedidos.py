@@ -43,7 +43,13 @@ def create_pedido(data: PedidoCreate):
 def get_pedidos():
     try:
         response = pedidos_table.scan()
-        return [_deserialize(i) for i in response.get("Items", [])]
+        result = []
+        for item in response.get("Items", []):
+            try:
+                result.append(_deserialize(item))
+            except Exception:
+                pass
+        return result
     except ClientError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
