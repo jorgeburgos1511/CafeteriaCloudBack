@@ -46,7 +46,7 @@ def get_pedidos():
         result = []
         for item in response.get("Items", []):
             try:
-                result.append(_deserialize(item))
+                result.append(Pedido(**_deserialize(item)))
             except Exception:
                 pass
         return result
