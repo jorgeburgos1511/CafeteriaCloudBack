@@ -1,5 +1,8 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
 from fastapi.middleware.cors import CORSMiddleware
 from routers.health import router as health_router
 from routers.customers import router as customers_router
