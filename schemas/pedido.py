@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from uuid import uuid4
-from typing import Literal, List
+from typing import Literal, List, Optional
 from datetime import datetime, timezone
 
 EstadoItem = Literal["Recibido", "En preparación", "Listo", "Entregado"]
