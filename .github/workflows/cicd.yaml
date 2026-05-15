@@ -71,6 +71,7 @@ jobs:
               "AWS_DEFAULT_REGION=${{ secrets.AWS_REGION }}" \
               "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" \
               "SNS_TOPIC_ARN=${{ secrets.SNS_TOPIC_ARN }}" \
+              "GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}" \
               > ~/CafeteriaCloud/.env.prod
 
             echo "Starting new container..."
