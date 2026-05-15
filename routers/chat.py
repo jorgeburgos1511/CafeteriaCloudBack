@@ -16,7 +16,7 @@ from aws.s3 import upload_ticket_pdf
 router = APIRouter(prefix="/chat", tags=["chat"])
 
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
-MODEL = "llama-3.3-70b-versatile"
+MODEL = "llama-3.1-8b-instant"
 
 SYSTEM_PROMPT_BASE = """Eres CaféBot, el asistente virtual de la Cafetería Universitaria ITESO.
 Al inicio de cada conversación tienes acceso al MENÚ ACTUAL y a los CLIENTES REGISTRADOS (ver abajo).
