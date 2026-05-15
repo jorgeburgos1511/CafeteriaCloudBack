@@ -15,8 +15,12 @@ def upload_product_image(file_content: bytes, content_type: str) -> str:
         Body=file_content,
         ContentType=content_type,
     )
-    region = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
-    return f"https://{BUCKET_NAME}.s3.{region}.amazonaws.com/{key}"
+    url = s3.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": BUCKET_NAME, "Key": key},
+        ExpiresIn=604800,  # 7 días
+    )
+    return url
 
 
 def upload_ticket_pdf(pedido_id: str, pdf_bytes: bytes) -> str:

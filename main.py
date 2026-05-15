@@ -9,6 +9,7 @@ from routers.customers import router as customers_router
 from routers.products import router as products_router
 from routers.pedidos import router as pedidos_router
 from routers.dashboard import router as dashboard_router
+from routers.chat import router as chat_router
 from aws.dynamodb import init_tables
 
 
@@ -32,6 +33,7 @@ app.include_router(customers_router)
 app.include_router(products_router)
 app.include_router(pedidos_router)
 app.include_router(dashboard_router)
+app.include_router(chat_router)
 
 
 @app.get("/", tags=["health"])

@@ -198,8 +198,8 @@ def finalizar_pedido(pedido_id: str):
             pdf_bytes = generate_ticket_pdf(pedido)
             pdf_url = upload_ticket_pdf(pedido["id"], pdf_bytes)
             publish_ticket(pedido, pdf_url)
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[WARN] ticket/SNS falló para pedido {pedido_id}: {e}")
 
         return updated
     except ClientError as e:

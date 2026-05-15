@@ -15,8 +15,11 @@ def _create_table_if_not_exists(table_name: str, key_schema: list, attribute_def
         table.wait_until_exists()
         print(f"Tabla '{table_name}' creada.")
     except ClientError as e:
-        if e.response["Error"]["Code"] == "ResourceInUseException":
+        code = e.response["Error"]["Code"]
+        if code == "ResourceInUseException":
             print(f"Tabla '{table_name}' ya existe.")
+        elif code in ("AccessDeniedException", "UnauthorizedException"):
+            print(f"[WARN] Sin permisos para crear '{table_name}' (probablemente ya existe).")
         else:
             raise
 
