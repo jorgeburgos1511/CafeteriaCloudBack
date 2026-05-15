@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from botocore.exceptions import ClientError
+from boto3.dynamodb.conditions import Attr
 from decimal import Decimal
 from schemas.pedido import Pedido, PedidoCreate, AddItemRequest
 from aws.dynamodb import pedidos_table, products_table, customers_table
@@ -32,8 +33,7 @@ def create_pedido(data: PedidoCreate):
     try:
         if not data.cliente_sns_arn:
             scan = customers_table.scan(
-                FilterExpression="cliente_email = :e",
-                ExpressionAttributeValues={":e": data.cliente_email},
+                FilterExpression=Attr("email").eq(data.cliente_email),
             )
             items = scan.get("Items", [])
             if items:
